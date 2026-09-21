@@ -1,11 +1,12 @@
 import React from "react";
-import { Screen } from "../../components/Screen";
-import { ComingSoon } from "../../components/ComingSoon";
+import { View } from "react-native";
+import { NotificationsList } from "../../components/notifications/NotificationsList";
+import { colors } from "../../theme";
 
 export function MechanicNotificationsScreen() {
   return (
-    <Screen scroll={false}>
-      <ComingSoon title="Notifications" />
-    </Screen>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <NotificationsList showClientName />
+    </View>
   );
 }

@@ -5,6 +5,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AxiosError } from "axios";
 import { serviceService } from "../api/serviceService";
 import { invoiceService } from "../api/invoiceService";
+import { notificationService } from "../api/notificationService";
 import { Service, ServiceStatus } from "../types/domain";
 import { Button, ErrorText, Field, LoadingView } from "../components/ui";
 import { ServicePartsSection } from "../components/services/ServicePartsSection";
@@ -24,6 +25,8 @@ export function ServiceDetailScreen({ route, navigation }: Props) {
   const [isSaving, setIsSaving] = useState(false);
   const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
   const [invoiceError, setInvoiceError] = useState<string | null>(null);
+  const [isNotifying, setIsNotifying] = useState(false);
+  const [notifySent, setNotifySent] = useState(false);
 
   const [odometer, setOdometer] = useState("0");
   const [complaint, setComplaint] = useState("");
@@ -102,6 +105,16 @@ export function ServiceDetailScreen({ route, navigation }: Props) {
     }
   }
 
+  async function handleNotify() {
+    setIsNotifying(true);
+    try {
+      await notificationService.notifyServiceCompleted(serviceId);
+      setNotifySent(true);
+    } finally {
+      setIsNotifying(false);
+    }
+  }
+
   return (
     <Screen>
       <Text style={styles.title}>
@@ -121,6 +134,19 @@ export function ServiceDetailScreen({ route, navigation }: Props) {
         <Text style={styles.hint}>Complete the service to generate an invoice.</Text>
       )}
       {invoiceError && <ErrorText message={invoiceError} />}
+
+      {service.status === "Completed" && (
+        <>
+          <View style={{ height: spacing.sm }} />
+          <Button
+            title={notifySent ? "Notified" : "Notify Client"}
+            variant="secondary"
+            onPress={handleNotify}
+            disabled={notifySent}
+            loading={isNotifying}
+          />
+        </>
+      )}
 
       <View style={{ height: spacing.lg }} />
 
