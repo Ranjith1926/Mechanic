@@ -2,14 +2,18 @@ import React, { useCallback, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { AxiosError } from "axios";
 import { bikeService } from "../api/bikeService";
+import { serviceService } from "../api/serviceService";
 import { Bike, BikeHistoryItem } from "../types/domain";
-import { Badge, Card, EmptyState, LoadingView } from "../components/ui";
+import { Badge, Button, Card, EmptyState, ErrorText, Fab, Field, LoadingView } from "../components/ui";
+import { FormModal } from "../components/FormModal";
 import { Screen } from "../components/Screen";
+import { useAuth } from "../context/AuthContext";
 import { colors, spacing } from "../theme";
+import type { SharedDetailParamList } from "../navigation/types";
 
-type RouteParams = { BikeDetail: { bikeId: number } };
-type Props = NativeStackScreenProps<RouteParams, "BikeDetail">;
+type Props = NativeStackScreenProps<SharedDetailParamList, "BikeDetail">;
 
 const STATUS_TONE: Record<string, "default" | "success" | "warning"> = {
   New: "warning",
@@ -17,11 +21,13 @@ const STATUS_TONE: Record<string, "default" | "success" | "warning"> = {
   Completed: "success",
 };
 
-export function BikeDetailScreen({ route }: Props) {
+export function BikeDetailScreen({ route, navigation }: Props) {
   const { bikeId } = route.params;
+  const { user } = useAuth();
   const [bike, setBike] = useState<Bike | null>(null);
   const [history, setHistory] = useState<BikeHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const load = useCallback(async () => {
     setIsLoading(true);
@@ -49,7 +55,24 @@ export function BikeDetailScreen({ route }: Props) {
   }
 
   return (
-    <Screen>
+    <Screen
+      floating={
+        user?.role === "Mechanic" ? (
+          <>
+            <Fab onPress={() => setIsFormOpen(true)} />
+            <NewServiceModal
+              bikeId={bikeId}
+              visible={isFormOpen}
+              onClose={() => setIsFormOpen(false)}
+              onCreated={(serviceId) => {
+                setIsFormOpen(false);
+                navigation.navigate("ServiceDetail", { serviceId });
+              }}
+            />
+          </>
+        ) : null
+      }
+    >
       <Card>
         <Text style={styles.bikeTitle}>
           {bike.brand} {bike.model}
@@ -92,6 +115,55 @@ export function BikeDetailScreen({ route }: Props) {
         ))
       )}
     </Screen>
+  );
+}
+
+function NewServiceModal({
+  bikeId,
+  visible,
+  onClose,
+  onCreated,
+}: {
+  bikeId: number;
+  visible: boolean;
+  onClose: () => void;
+  onCreated: (serviceId: number) => void;
+}) {
+  const [odometer, setOdometer] = useState("0");
+  const [complaint, setComplaint] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit() {
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      const service = await serviceService.create({
+        bikeId,
+        odometer: Number(odometer) || 0,
+        complaint: complaint || undefined,
+        labourAmount: 0,
+      });
+      setOdometer("0");
+      setComplaint("");
+      onCreated(service.id);
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      setError(axiosError.response?.data?.message ?? "Could not start service.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <FormModal visible={visible} title="Start New Service" onClose={onClose}>
+      <Field label="Current Odometer (km)" value={odometer} onChangeText={setOdometer} keyboardType="number-pad" />
+      <Field label="Customer Complaint" value={complaint} onChangeText={setComplaint} />
+      {error && <ErrorText message={error} />}
+      <View style={{ marginTop: spacing.md }}>
+        <Button title="Start service" onPress={handleSubmit} loading={isSubmitting} />
+      </View>
+    </FormModal>
   );
 }
 

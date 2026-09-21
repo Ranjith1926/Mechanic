@@ -7,10 +7,13 @@ export function Screen({
   children,
   scroll = true,
   style,
+  floating,
 }: {
   children: React.ReactNode;
   scroll?: boolean;
   style?: ViewStyle;
+  /** Rendered outside the scroll view, e.g. a Fab that should stay fixed on screen. */
+  floating?: React.ReactNode;
 }) {
   return (
     <SafeAreaView style={styles.safeArea} edges={["bottom", "left", "right"]}>
@@ -21,6 +24,7 @@ export function Screen({
       ) : (
         <View style={[styles.container, style]}>{children}</View>
       )}
+      {floating}
     </SafeAreaView>
   );
 }
