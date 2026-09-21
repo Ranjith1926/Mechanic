@@ -50,3 +50,25 @@ export interface BikeHistoryItem {
   invoiceNumber?: string | null;
   invoiceTotal?: number | null;
 }
+
+export interface Service {
+  id: number;
+  bikeId: number;
+  bikeRegistrationNumber: string;
+  bikeLabel: string;
+  clientId: number;
+  clientName: string;
+  mechanicId: number;
+  mechanicName: string;
+  serviceDate: string;
+  odometer: number;
+  complaint?: string | null;
+  inspectionNotes?: string | null;
+  workPerformed?: string | null;
+  labourAmount: number;
+  status: ServiceStatus;
+  notes?: string | null;
+  hasInvoice: boolean;
+  createdAt: string;
+  completedAt?: string | null;
+}
