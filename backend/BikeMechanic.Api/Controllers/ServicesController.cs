@@ -167,11 +167,91 @@ public class ServicesController : ControllerBase
         return ToResponse(updated);
     }
 
+    [HttpPost("{id:int}/parts")]
+    [Authorize(Policy = Policies.MechanicOnly)]
+    public async Task<ActionResult<ServiceResponse>> AddPart(int id, AddServicePartRequest request)
+    {
+        var service = await _db.Services.FirstOrDefaultAsync(s => s.Id == id);
+        if (service is null)
+        {
+            return NotFound();
+        }
+
+        var sparePart = await _db.SpareParts.FindAsync(request.SparePartId);
+        if (sparePart is null)
+        {
+            return BadRequest(new { message = "Spare part not found." });
+        }
+
+        var unitPrice = request.UnitPrice ?? sparePart.DefaultPrice;
+
+        var servicePart = new ServicePart
+        {
+            ServiceId = id,
+            SparePartId = request.SparePartId,
+            Quantity = request.Quantity,
+            UnitPrice = unitPrice,
+            TotalPrice = unitPrice * request.Quantity,
+            Action = request.Action,
+            OldPartDescription = request.OldPartDescription,
+            NewPartDescription = request.NewPartDescription,
+            Notes = request.Notes
+        };
+
+        _db.ServiceParts.Add(servicePart);
+        await _db.SaveChangesAsync();
+
+        var updated = await BaseQuery().FirstAsync(s => s.Id == id);
+        return ToResponse(updated);
+    }
+
+    [HttpPut("{id:int}/parts/{partId:int}")]
+    [Authorize(Policy = Policies.MechanicOnly)]
+    public async Task<ActionResult<ServiceResponse>> UpdatePart(int id, int partId, UpdateServicePartRequest request)
+    {
+        var servicePart = await _db.ServiceParts.FirstOrDefaultAsync(sp => sp.Id == partId && sp.ServiceId == id);
+        if (servicePart is null)
+        {
+            return NotFound();
+        }
+
+        servicePart.Quantity = request.Quantity;
+        servicePart.UnitPrice = request.UnitPrice;
+        servicePart.TotalPrice = request.UnitPrice * request.Quantity;
+        servicePart.Action = request.Action;
+        servicePart.OldPartDescription = request.OldPartDescription;
+        servicePart.NewPartDescription = request.NewPartDescription;
+        servicePart.Notes = request.Notes;
+
+        await _db.SaveChangesAsync();
+
+        var updated = await BaseQuery().FirstAsync(s => s.Id == id);
+        return ToResponse(updated);
+    }
+
+    [HttpDelete("{id:int}/parts/{partId:int}")]
+    [Authorize(Policy = Policies.MechanicOnly)]
+    public async Task<ActionResult<ServiceResponse>> RemovePart(int id, int partId)
+    {
+        var servicePart = await _db.ServiceParts.FirstOrDefaultAsync(sp => sp.Id == partId && sp.ServiceId == id);
+        if (servicePart is null)
+        {
+            return NotFound();
+        }
+
+        _db.ServiceParts.Remove(servicePart);
+        await _db.SaveChangesAsync();
+
+        var updated = await BaseQuery().FirstAsync(s => s.Id == id);
+        return ToResponse(updated);
+    }
+
     private IQueryable<Service> BaseQuery() =>
         _db.Services
             .Include(s => s.Bike).ThenInclude(b => b.Client)
             .Include(s => s.Mechanic)
-            .Include(s => s.Invoice);
+            .Include(s => s.Invoice)
+            .Include(s => s.ServiceParts).ThenInclude(sp => sp.SparePart);
 
     private async Task<int?> GetOwnClientId()
     {
@@ -221,6 +301,19 @@ public class ServicesController : ControllerBase
         Notes = s.Notes,
         HasInvoice = s.Invoice != null,
         CreatedAt = s.CreatedAt,
-        CompletedAt = s.CompletedAt
+        CompletedAt = s.CompletedAt,
+        Parts = s.ServiceParts.Select(sp => new ServicePartResponse
+        {
+            Id = sp.Id,
+            SparePartId = sp.SparePartId,
+            SparePartName = sp.SparePart.Name,
+            Quantity = sp.Quantity,
+            UnitPrice = sp.UnitPrice,
+            TotalPrice = sp.TotalPrice,
+            Action = sp.Action.ToString(),
+            OldPartDescription = sp.OldPartDescription,
+            NewPartDescription = sp.NewPartDescription,
+            Notes = sp.Notes
+        }).ToList()
     };
 }

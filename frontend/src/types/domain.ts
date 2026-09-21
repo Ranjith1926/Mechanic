@@ -51,6 +51,21 @@ export interface BikeHistoryItem {
   invoiceTotal?: number | null;
 }
 
+export type SparePartAction = "Inspected" | "Reused" | "Replaced" | "Added" | "Removed";
+
+export interface ServicePart {
+  id: number;
+  sparePartId: number;
+  sparePartName: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  action: SparePartAction;
+  oldPartDescription?: string | null;
+  newPartDescription?: string | null;
+  notes?: string | null;
+}
+
 export interface Service {
   id: number;
   bikeId: number;
@@ -71,4 +86,16 @@ export interface Service {
   hasInvoice: boolean;
   createdAt: string;
   completedAt?: string | null;
+  parts: ServicePart[];
+}
+
+export interface SparePart {
+  id: number;
+  name: string;
+  brand?: string | null;
+  partNumber?: string | null;
+  defaultPrice: number;
+  description?: string | null;
+  isActive: boolean;
+  createdAt: string;
 }

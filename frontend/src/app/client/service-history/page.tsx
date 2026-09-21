@@ -56,6 +56,16 @@ export default function ClientServiceHistoryPage() {
 
               {item.workPerformed && <p className="mt-2 text-sm text-gray-700">{item.workPerformed}</p>}
 
+              {item.parts.length > 0 && (
+                <ul className="mt-2 space-y-0.5 text-sm text-gray-500">
+                  {item.parts.map((part, index) => (
+                    <li key={index}>
+                      {part.partName} — {part.action}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
               {item.invoiceNumber && (
                 <p className="mt-2 text-sm text-gray-500">
                   Invoice {item.invoiceNumber}: Rs. {item.invoiceTotal?.toLocaleString()}

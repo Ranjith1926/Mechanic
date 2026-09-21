@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AxiosError } from "axios";
 import { serviceService } from "@/services/serviceService";
 import { Service, ServiceStatus } from "@/types/domain";
+import { ServicePartsSection } from "@/components/services/ServicePartsSection";
 
 const STATUS_OPTIONS: ServiceStatus[] = ["New", "InProgress", "Completed"];
 
@@ -180,6 +181,8 @@ export default function ServiceDetailPage() {
           </button>
         </div>
       </form>
+
+      <ServicePartsSection service={service} onChange={setService} />
     </div>
   );
 }
