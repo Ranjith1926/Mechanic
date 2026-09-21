@@ -12,10 +12,30 @@ functional requirements.
 
 ## Current status
 
-Phase 1 (foundation/auth) and the start of Phase 2 (clients, bikes, bike history) are implemented
-end-to-end, backend and frontend. Remaining phases (services, spare parts, invoices,
-notifications, follow-ups, revenue dashboard) follow the build order in the requirements doc,
-section 33.
+Phases 1–8 (auth, clients/bikes, services, spare parts, invoices, notifications, follow-ups,
+revenue dashboard) are implemented end-to-end, backend and frontend, matching the Definition of
+Done in the requirements doc, section 35. Phase 9 (containerized/cloud deployment, CI/CD,
+monitoring) has not been started — the current IIS setup described below is a manual LAN
+deployment, not the production path from section 30.
+
+## Demo deployment (LAN)
+
+A running instance is published locally for testing, with seeded demo data covering every page.
+
+| Service | URL |
+|---|---|
+| Web app | http://192.168.0.195:7002 (standalone Next.js production build) |
+| API / Swagger | http://192.168.0.195:7001/swagger |
+
+**Demo login credentials** (local/LAN demo data only — not real accounts):
+
+| Role | Phone | Password |
+|---|---|---|
+| Mechanic | `9000000000` | `Mechanic@123` |
+| Client | `9111111111` | `Client@123` |
+
+These only work against the local SQL Server instance this app is currently pointed at and are not
+meant to be reused for any real deployment.
 
 ## Running locally
 
