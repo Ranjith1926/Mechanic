@@ -28,9 +28,4 @@ export const invoiceService = {
     const { data } = await apiClient.post<Invoice>(`/api/invoices/${id}/void`, {});
     return data;
   },
-
-  async getPdfBlob(id: number): Promise<Blob> {
-    const { data } = await apiClient.get(`/api/invoices/${id}/pdf`, { responseType: "blob" });
-    return data;
-  },
 };

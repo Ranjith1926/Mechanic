@@ -4,6 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AxiosError } from "axios";
 import { serviceService } from "../api/serviceService";
+import { invoiceService } from "../api/invoiceService";
 import { Service, ServiceStatus } from "../types/domain";
 import { Button, ErrorText, Field, LoadingView } from "../components/ui";
 import { ServicePartsSection } from "../components/services/ServicePartsSection";
@@ -15,12 +16,14 @@ type Props = NativeStackScreenProps<SharedDetailParamList, "ServiceDetail">;
 
 const STATUS_OPTIONS: ServiceStatus[] = ["New", "InProgress", "Completed"];
 
-export function ServiceDetailScreen({ route }: Props) {
+export function ServiceDetailScreen({ route, navigation }: Props) {
   const { serviceId } = route.params;
   const [service, setService] = useState<Service | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
+  const [invoiceError, setInvoiceError] = useState<string | null>(null);
 
   const [odometer, setOdometer] = useState("0");
   const [complaint, setComplaint] = useState("");
@@ -85,12 +88,41 @@ export function ServiceDetailScreen({ route }: Props) {
     );
   }
 
+  async function handleGenerateInvoice() {
+    setInvoiceError(null);
+    setIsGeneratingInvoice(true);
+    try {
+      const invoice = await invoiceService.create({ serviceId });
+      navigation.navigate("InvoiceDetail", { invoiceId: invoice.id });
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      setInvoiceError(axiosError.response?.data?.message ?? "Could not generate invoice.");
+    } finally {
+      setIsGeneratingInvoice(false);
+    }
+  }
+
   return (
     <Screen>
       <Text style={styles.title}>
         {service.clientName} — {service.bikeLabel}
       </Text>
       <Text style={styles.subtitle}>{service.bikeRegistrationNumber}</Text>
+
+      {service.hasInvoice && service.invoiceId ? (
+        <Button
+          title="View Invoice"
+          variant="secondary"
+          onPress={() => navigation.navigate("InvoiceDetail", { invoiceId: service.invoiceId! })}
+        />
+      ) : service.status === "Completed" ? (
+        <Button title="Generate Invoice" onPress={handleGenerateInvoice} loading={isGeneratingInvoice} />
+      ) : (
+        <Text style={styles.hint}>Complete the service to generate an invoice.</Text>
+      )}
+      {invoiceError && <ErrorText message={invoiceError} />}
+
+      <View style={{ height: spacing.lg }} />
 
       <Field label="Odometer (km)" value={odometer} onChangeText={setOdometer} keyboardType="number-pad" />
 
@@ -124,7 +156,8 @@ export function ServiceDetailScreen({ route }: Props) {
 
 const styles = StyleSheet.create({
   title: { fontSize: 17, fontWeight: "700", color: colors.text },
-  subtitle: { fontSize: 13, color: colors.textMuted, marginTop: 2, marginBottom: spacing.lg },
+  subtitle: { fontSize: 13, color: colors.textMuted, marginTop: 2, marginBottom: spacing.md },
+  hint: { fontSize: 13, color: colors.textMuted, fontStyle: "italic" },
   fieldLabel: { fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 },
   statusRow: { flexDirection: "row", gap: spacing.xs, marginBottom: spacing.md },
   statusChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: colors.border },

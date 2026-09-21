@@ -5,7 +5,7 @@ import { CustomersStack } from "./CustomersStack";
 import { BikesStack } from "./BikesStack";
 import { ServicesStack } from "./ServicesStack";
 import { SparePartsCatalogScreen } from "../screens/mechanic/SparePartsCatalogScreen";
-import { InvoicesScreen } from "../screens/mechanic/InvoicesScreen";
+import { InvoicesStack } from "./InvoicesStack";
 import { FollowUpsScreen } from "../screens/mechanic/FollowUpsScreen";
 import { MechanicNotificationsScreen } from "../screens/mechanic/NotificationsScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
@@ -39,7 +39,7 @@ export function MechanicNavigator() {
       <Drawer.Screen name="Bikes" component={BikesStack} options={{ headerShown: false }} />
       <Drawer.Screen name="Services" component={ServicesStack} options={{ headerShown: false }} />
       <Drawer.Screen name="Spare Parts" component={SparePartsCatalogScreen} />
-      <Drawer.Screen name="Invoices" component={InvoicesScreen} />
+      <Drawer.Screen name="Invoices" component={InvoicesStack} options={{ headerShown: false }} />
       <Drawer.Screen name="Follow-ups" component={FollowUpsScreen} />
       <Drawer.Screen name="Notifications" component={MechanicNotificationsScreen} />
       <Drawer.Screen name="Profile" component={ProfileScreen} />

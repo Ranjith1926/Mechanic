@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { BikesListScreen } from "../screens/mechanic/BikesListScreen";
 import { BikeDetailScreen } from "../screens/BikeDetailScreen";
 import { ServiceDetailScreen } from "../screens/ServiceDetailScreen";
+import { InvoiceDetailScreen } from "../screens/InvoiceDetailScreen";
 import type { SharedDetailParamList } from "./types";
 
 export type BikesStackParamList = SharedDetailParamList & {
@@ -17,6 +18,7 @@ export function BikesStack() {
       <Stack.Screen name="BikesList" component={BikesListScreen} options={{ title: "Bikes" }} />
       <Stack.Screen name="BikeDetail" component={BikeDetailScreen} options={{ title: "Bike History" }} />
       <Stack.Screen name="ServiceDetail" component={ServiceDetailScreen} options={{ title: "Service" }} />
+      <Stack.Screen name="InvoiceDetail" component={InvoiceDetailScreen} options={{ title: "Invoice" }} />
     </Stack.Navigator>
   );
 }

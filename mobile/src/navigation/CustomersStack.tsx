@@ -4,6 +4,7 @@ import { CustomersListScreen } from "../screens/mechanic/CustomersListScreen";
 import { CustomerBikesScreen } from "../screens/mechanic/CustomerBikesScreen";
 import { BikeDetailScreen } from "../screens/BikeDetailScreen";
 import { ServiceDetailScreen } from "../screens/ServiceDetailScreen";
+import { InvoiceDetailScreen } from "../screens/InvoiceDetailScreen";
 import type { SharedDetailParamList } from "./types";
 
 export type CustomersStackParamList = SharedDetailParamList & {
@@ -24,6 +25,7 @@ export function CustomersStack() {
       />
       <Stack.Screen name="BikeDetail" component={BikeDetailScreen} options={{ title: "Bike History" }} />
       <Stack.Screen name="ServiceDetail" component={ServiceDetailScreen} options={{ title: "Service" }} />
+      <Stack.Screen name="InvoiceDetail" component={InvoiceDetailScreen} options={{ title: "Invoice" }} />
     </Stack.Navigator>
   );
 }

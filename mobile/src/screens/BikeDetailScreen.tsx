@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AxiosError } from "axios";
@@ -106,10 +106,12 @@ export function BikeDetailScreen({ route, navigation }: Props) {
                 </Text>
               ))}
 
-            {item.invoiceNumber && (
-              <Text style={styles.historyText}>
-                Invoice {item.invoiceNumber}: Rs. {item.invoiceTotal?.toLocaleString()}
-              </Text>
+            {item.invoiceNumber && item.invoiceId && (
+              <TouchableOpacity onPress={() => navigation.navigate("InvoiceDetail", { invoiceId: item.invoiceId! })}>
+                <Text style={styles.invoiceLink}>
+                  Invoice {item.invoiceNumber}: Rs. {item.invoiceTotal?.toLocaleString()} →
+                </Text>
+              </TouchableOpacity>
             )}
           </Card>
         ))
@@ -182,4 +184,5 @@ const styles = StyleSheet.create({
   historyDate: { fontSize: 14, fontWeight: "600", color: colors.text },
   historyText: { fontSize: 13, color: colors.text, marginTop: 6 },
   partText: { fontSize: 13, color: colors.textMuted, marginTop: 4 },
+  invoiceLink: { fontSize: 13, color: colors.primary, fontWeight: "600", marginTop: 6 },
 });
