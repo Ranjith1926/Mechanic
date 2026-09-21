@@ -148,3 +148,25 @@ export interface AppNotification {
   sentAt?: string | null;
   createdAt: string;
 }
+
+export type FollowUpType = "GeneralService" | "EngineOil" | "BrakeCheck" | "TyreCheck" | "Custom";
+export type FollowUpStatus = "Pending" | "Completed" | "Cancelled";
+
+export interface FollowUp {
+  id: number;
+  clientId: number;
+  clientName: string;
+  clientPhone: string;
+  bikeId: number;
+  bikeRegistrationNumber: string;
+  bikeLabel: string;
+  serviceId: number;
+  invoiceId?: number | null;
+  followUpDate: string;
+  followUpType: FollowUpType;
+  notes?: string | null;
+  status: FollowUpStatus;
+  notificationSent: boolean;
+  createdAt: string;
+  completedAt?: string | null;
+}

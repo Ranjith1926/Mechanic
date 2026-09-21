@@ -9,6 +9,7 @@ import { invoiceService } from "@/services/invoiceService";
 import { notificationService } from "@/services/notificationService";
 import { Service, ServiceStatus } from "@/types/domain";
 import { ServicePartsSection } from "@/components/services/ServicePartsSection";
+import { CreateFollowUpForm } from "@/components/services/CreateFollowUpForm";
 
 const STATUS_OPTIONS: ServiceStatus[] = ["New", "InProgress", "Completed"];
 
@@ -243,6 +244,8 @@ export default function ServiceDetailPage() {
       </form>
 
       <ServicePartsSection service={service} onChange={setService} />
+
+      {service.status === "Completed" && <CreateFollowUpForm serviceId={service.id} />}
     </div>
   );
 }
