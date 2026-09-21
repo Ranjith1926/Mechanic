@@ -300,6 +300,7 @@ public class ServicesController : ControllerBase
         Status = s.Status.ToString(),
         Notes = s.Notes,
         HasInvoice = s.Invoice != null,
+        InvoiceId = s.Invoice?.Id,
         CreatedAt = s.CreatedAt,
         CompletedAt = s.CompletedAt,
         Parts = s.ServiceParts.Select(sp => new ServicePartResponse

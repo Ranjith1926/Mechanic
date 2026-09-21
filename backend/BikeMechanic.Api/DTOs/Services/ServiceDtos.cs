@@ -22,6 +22,7 @@ public class ServiceResponse
     public string Status { get; set; } = string.Empty;
     public string? Notes { get; set; }
     public bool HasInvoice { get; set; }
+    public int? InvoiceId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
     public List<ServicePartResponse> Parts { get; set; } = new();

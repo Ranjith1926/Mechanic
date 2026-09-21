@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { bikeService } from "@/services/bikeService";
 import { BikeHistoryItem } from "@/types/domain";
 
@@ -66,9 +67,12 @@ export default function ClientServiceHistoryPage() {
                 </ul>
               )}
 
-              {item.invoiceNumber && (
+              {item.invoiceNumber && item.invoiceId && (
                 <p className="mt-2 text-sm text-gray-500">
-                  Invoice {item.invoiceNumber}: Rs. {item.invoiceTotal?.toLocaleString()}
+                  Invoice {item.invoiceNumber}: Rs. {item.invoiceTotal?.toLocaleString()}{" "}
+                  <Link href={`/client/invoices/${item.invoiceId}`} className="text-blue-600 hover:underline">
+                    View Invoice
+                  </Link>
                 </p>
               )}
             </li>

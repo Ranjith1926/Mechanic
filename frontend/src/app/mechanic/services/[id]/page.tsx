@@ -1,10 +1,11 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { AxiosError } from "axios";
 import { serviceService } from "@/services/serviceService";
+import { invoiceService } from "@/services/invoiceService";
 import { Service, ServiceStatus } from "@/types/domain";
 import { ServicePartsSection } from "@/components/services/ServicePartsSection";
 
@@ -13,11 +14,14 @@ const STATUS_OPTIONS: ServiceStatus[] = ["New", "InProgress", "Completed"];
 export default function ServiceDetailPage() {
   const params = useParams<{ id: string }>();
   const serviceId = Number(params.id);
+  const router = useRouter();
 
   const [service, setService] = useState<Service | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
+  const [invoiceError, setInvoiceError] = useState<string | null>(null);
 
   const [odometer, setOdometer] = useState(0);
   const [complaint, setComplaint] = useState("");
@@ -76,6 +80,19 @@ export default function ServiceDetailPage() {
     return <p className="text-sm text-red-600">{error ?? "Service not found."}</p>;
   }
 
+  async function handleGenerateInvoice() {
+    setInvoiceError(null);
+    setIsGeneratingInvoice(true);
+    try {
+      const invoice = await invoiceService.create({ serviceId });
+      router.push(`/mechanic/invoices/${invoice.id}`);
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      setInvoiceError(axiosError.response?.data?.message ?? "Could not generate invoice.");
+      setIsGeneratingInvoice(false);
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -85,10 +102,31 @@ export default function ServiceDetailPage() {
           </h1>
           <p className="text-sm text-gray-500">{service.bikeRegistrationNumber}</p>
         </div>
-        <Link href={`/mechanic/bikes/${service.bikeId}`} className="text-sm text-blue-600 hover:underline">
-          View bike history
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href={`/mechanic/bikes/${service.bikeId}`} className="text-sm text-blue-600 hover:underline">
+            View bike history
+          </Link>
+          {service.hasInvoice && service.invoiceId ? (
+            <Link
+              href={`/mechanic/invoices/${service.invoiceId}`}
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              View Invoice
+            </Link>
+          ) : service.status === "Completed" ? (
+            <button
+              onClick={handleGenerateInvoice}
+              disabled={isGeneratingInvoice}
+              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+            >
+              {isGeneratingInvoice ? "Generating..." : "Generate Invoice"}
+            </button>
+          ) : (
+            <span className="text-sm text-gray-400">Complete the service to generate an invoice</span>
+          )}
+        </div>
       </div>
+      {invoiceError && <p className="mt-2 text-sm text-red-600">{invoiceError}</p>}
 
       <form onSubmit={handleSubmit} className="mt-4 grid grid-cols-1 gap-4 rounded-lg border border-gray-200 bg-white p-4 sm:grid-cols-2">
         <div>

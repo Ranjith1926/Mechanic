@@ -84,6 +84,7 @@ export interface Service {
   status: ServiceStatus;
   notes?: string | null;
   hasInvoice: boolean;
+  invoiceId?: number | null;
   createdAt: string;
   completedAt?: string | null;
   parts: ServicePart[];
@@ -98,4 +99,37 @@ export interface SparePart {
   description?: string | null;
   isActive: boolean;
   createdAt: string;
+}
+
+export type InvoiceItemCategory = "Labour" | "SparePart" | "Other";
+
+export interface InvoiceItem {
+  id: number;
+  description: string;
+  category: InvoiceItemCategory;
+  quantity: number;
+  unitPrice: number;
+  amount: number;
+}
+
+export interface Invoice {
+  id: number;
+  invoiceNumber: string;
+  serviceId: number;
+  clientId: number;
+  clientName: string;
+  clientPhone: string;
+  bikeId: number;
+  bikeRegistrationNumber: string;
+  bikeLabel: string;
+  invoiceDate: string;
+  labourAmount: number;
+  sparePartsAmount: number;
+  discount: number;
+  tax: number;
+  totalAmount: number;
+  notes?: string | null;
+  isVoided: boolean;
+  createdAt: string;
+  items: InvoiceItem[];
 }

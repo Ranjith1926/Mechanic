@@ -19,6 +19,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
+builder.Services.AddSingleton<IInvoicePdfService, InvoicePdfService>();
+PdfSharp.Fonts.GlobalFontSettings.FontResolver = new PdfFontResolver();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
