@@ -1,8 +1,8 @@
 import React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { MechanicDashboardScreen } from "../screens/mechanic/DashboardScreen";
-import { CustomersScreen } from "../screens/mechanic/CustomersScreen";
-import { BikesScreen } from "../screens/mechanic/BikesScreen";
+import { CustomersStack } from "./CustomersStack";
+import { BikesStack } from "./BikesStack";
 import { ServicesScreen } from "../screens/mechanic/ServicesScreen";
 import { SparePartsScreen } from "../screens/mechanic/SparePartsScreen";
 import { InvoicesScreen } from "../screens/mechanic/InvoicesScreen";
@@ -35,8 +35,8 @@ export function MechanicNavigator() {
       }}
     >
       <Drawer.Screen name="Dashboard" component={MechanicDashboardScreen} />
-      <Drawer.Screen name="Customers" component={CustomersScreen} />
-      <Drawer.Screen name="Bikes" component={BikesScreen} />
+      <Drawer.Screen name="Customers" component={CustomersStack} options={{ headerShown: false }} />
+      <Drawer.Screen name="Bikes" component={BikesStack} options={{ headerShown: false }} />
       <Drawer.Screen name="Services" component={ServicesScreen} />
       <Drawer.Screen name="Spare Parts" component={SparePartsScreen} />
       <Drawer.Screen name="Invoices" component={InvoicesScreen} />
