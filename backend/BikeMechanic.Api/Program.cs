@@ -20,6 +20,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 builder.Services.AddSingleton<IInvoicePdfService, InvoicePdfService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 PdfSharp.Fonts.GlobalFontSettings.FontResolver = new PdfFontResolver();
 
 builder.Services.AddControllers()

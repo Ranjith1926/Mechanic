@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { invoiceService } from "@/services/invoiceService";
+import { notificationService } from "@/services/notificationService";
 import { Invoice } from "@/types/domain";
 import { downloadBlob, openBlobForPrint, shareOrDownloadBlob } from "@/utils/pdf";
 
@@ -10,6 +11,7 @@ export function InvoiceDetailView({ invoiceId, canVoid = false }: { invoiceId: n
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
+  const [notifySent, setNotifySent] = useState(false);
 
   useEffect(() => {
     invoiceService
@@ -63,6 +65,16 @@ export function InvoiceDetailView({ invoiceId, canVoid = false }: { invoiceId: n
     try {
       const updated = await invoiceService.void(invoice!.id);
       setInvoice(updated);
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  async function handleNotify() {
+    setIsBusy(true);
+    try {
+      await notificationService.notifyInvoiceCreated(invoice!.id);
+      setNotifySent(true);
     } finally {
       setIsBusy(false);
     }
@@ -165,6 +177,15 @@ export function InvoiceDetailView({ invoiceId, canVoid = false }: { invoiceId: n
         >
           Share
         </button>
+        {canVoid && (
+          <button
+            onClick={handleNotify}
+            disabled={isBusy || notifySent}
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+          >
+            {notifySent ? "Notified" : "Notify Client"}
+          </button>
+        )}
         {canVoid && !invoice.isVoided && (
           <button
             onClick={handleVoid}

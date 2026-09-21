@@ -133,3 +133,18 @@ export interface Invoice {
   createdAt: string;
   items: InvoiceItem[];
 }
+
+export type NotificationType = "ServiceCompleted" | "InvoiceCreated" | "FollowUpReminder" | "GeneralNotification";
+
+export interface AppNotification {
+  id: number;
+  clientId: number;
+  clientName: string;
+  title: string;
+  message: string;
+  type: NotificationType;
+  referenceId?: number | null;
+  isRead: boolean;
+  sentAt?: string | null;
+  createdAt: string;
+}

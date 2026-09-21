@@ -17,12 +17,18 @@ public class InvoicesController : ControllerBase
     private readonly AppDbContext _db;
     private readonly ICurrentUserService _currentUser;
     private readonly IInvoicePdfService _pdfService;
+    private readonly INotificationService _notificationService;
 
-    public InvoicesController(AppDbContext db, ICurrentUserService currentUser, IInvoicePdfService pdfService)
+    public InvoicesController(
+        AppDbContext db,
+        ICurrentUserService currentUser,
+        IInvoicePdfService pdfService,
+        INotificationService notificationService)
     {
         _db = db;
         _currentUser = currentUser;
         _pdfService = pdfService;
+        _notificationService = notificationService;
     }
 
     [HttpGet]
@@ -171,6 +177,29 @@ public class InvoicesController : ControllerBase
 
         var updated = await BaseQuery().FirstAsync(i => i.Id == id);
         return ToResponse(updated);
+    }
+
+    [HttpPost("{id:int}/notify")]
+    [Authorize(Policy = Policies.MechanicOnly)]
+    public async Task<IActionResult> Notify(int id)
+    {
+        var invoice = await BaseQuery().FirstOrDefaultAsync(i => i.Id == id);
+        if (invoice is null)
+        {
+            return NotFound();
+        }
+
+        var message = $"Your invoice {invoice.InvoiceNumber} for {invoice.Bike.Brand} {invoice.Bike.Model} " +
+                      $"has been generated.\n\nTotal Amount: Rs. {invoice.TotalAmount:N2}";
+
+        await _notificationService.CreateAsync(
+            invoice.ClientId,
+            "Invoice Generated",
+            message,
+            NotificationType.InvoiceCreated,
+            invoice.Id);
+
+        return NoContent();
     }
 
     private IQueryable<Invoice> BaseQuery() =>

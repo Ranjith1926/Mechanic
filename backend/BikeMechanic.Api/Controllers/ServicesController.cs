@@ -16,11 +16,13 @@ public class ServicesController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly ICurrentUserService _currentUser;
+    private readonly INotificationService _notificationService;
 
-    public ServicesController(AppDbContext db, ICurrentUserService currentUser)
+    public ServicesController(AppDbContext db, ICurrentUserService currentUser, INotificationService notificationService)
     {
         _db = db;
         _currentUser = currentUser;
+        _notificationService = notificationService;
     }
 
     [HttpGet]
@@ -165,6 +167,36 @@ public class ServicesController : ControllerBase
 
         var updated = await BaseQuery().FirstAsync(s => s.Id == id);
         return ToResponse(updated);
+    }
+
+    [HttpPost("{id:int}/notify")]
+    [Authorize(Policy = Policies.MechanicOnly)]
+    public async Task<IActionResult> Notify(int id)
+    {
+        var service = await BaseQuery().FirstOrDefaultAsync(s => s.Id == id);
+        if (service is null)
+        {
+            return NotFound();
+        }
+
+        if (service.Status != ServiceStatus.Completed)
+        {
+            return BadRequest(new { message = "Only completed services can be notified to the client." });
+        }
+
+        var bikeLabel = $"{service.Bike.Brand} {service.Bike.Model}";
+        var message = service.Invoice is not null
+            ? $"Your {bikeLabel} service has been completed.\n\nInvoice Amount: Rs. {service.Invoice.TotalAmount:N2}\n\nThank you for choosing our service."
+            : $"Your {bikeLabel} service has been completed.\n\nThank you for choosing our service.";
+
+        await _notificationService.CreateAsync(
+            service.Bike.ClientId,
+            "Service Completed",
+            message,
+            NotificationType.ServiceCompleted,
+            service.Id);
+
+        return NoContent();
     }
 
     [HttpPost("{id:int}/parts")]

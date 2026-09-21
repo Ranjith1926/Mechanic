@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AxiosError } from "axios";
 import { serviceService } from "@/services/serviceService";
 import { invoiceService } from "@/services/invoiceService";
+import { notificationService } from "@/services/notificationService";
 import { Service, ServiceStatus } from "@/types/domain";
 import { ServicePartsSection } from "@/components/services/ServicePartsSection";
 
@@ -22,6 +23,8 @@ export default function ServiceDetailPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
   const [invoiceError, setInvoiceError] = useState<string | null>(null);
+  const [isNotifying, setIsNotifying] = useState(false);
+  const [notifySent, setNotifySent] = useState(false);
 
   const [odometer, setOdometer] = useState(0);
   const [complaint, setComplaint] = useState("");
@@ -93,6 +96,16 @@ export default function ServiceDetailPage() {
     }
   }
 
+  async function handleNotify() {
+    setIsNotifying(true);
+    try {
+      await notificationService.notifyServiceCompleted(serviceId);
+      setNotifySent(true);
+    } finally {
+      setIsNotifying(false);
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -123,6 +136,15 @@ export default function ServiceDetailPage() {
             </button>
           ) : (
             <span className="text-sm text-gray-400">Complete the service to generate an invoice</span>
+          )}
+          {service.status === "Completed" && (
+            <button
+              onClick={handleNotify}
+              disabled={isNotifying || notifySent}
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+            >
+              {notifySent ? "Notified" : isNotifying ? "Sending..." : "Notify Client"}
+            </button>
           )}
         </div>
       </div>
